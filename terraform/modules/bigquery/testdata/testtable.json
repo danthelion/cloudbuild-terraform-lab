@@ -1,0 +1,26 @@
+[
+    {
+        "description": "Example description for a field.",
+        "mode": "NULLABLE",
+        "name": "example_field_1",
+        "type": "STRING"
+    },
+    {
+        "description": "Example description for a field.",
+        "mode": "NULLABLE",
+        "name": "example_field_2",
+        "type": "INTEGER"
+    },
+    {
+        "description": "Example description for a field.",
+        "mode": "NULLABLE",
+        "name": "example_field_3",
+        "type": "STRING"
+    },
+    {
+        "description": "Example description for a field.",
+        "mode": "NULLABLE",
+        "name": "example_field_4",
+        "type": "STRING"
+    }
+]
