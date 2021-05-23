@@ -22,6 +22,11 @@ the infrastructure of the development environment.
 - Create a Cloud Build trigger to deploy infrastructure changes from the master branch.  
 - Promote changes to the production environment.
 
+## Requirements
+
+- `gcloud` installed and authenticated to your GCP project.
+- `terraform` version >= 0.14 installed. (You can check with `terraform version`)
+
 ## Task 1 - Set up your GitHub repository.
 Fork this repository and clone the fork to your local machine.
 
@@ -44,9 +49,9 @@ The code in the *terraform* folder of this repository is structured as follows:
 
 For the master branc, the following steps are executed:
 
-terraform init
-terraform plan
-terraform apply
+- terraform init
+- terraform plan
+- terraform apply
 
 
 For any other branch, the following steps are executed:
@@ -196,9 +201,9 @@ terraform plan -var-file=environments/dev/terraform.tfvars
 terraform apply -var-file=environments/dev/terraform.tfvars
 ```
 
-6. Stage and commit your changes.
+6. Stage, commit and push your changes to the remote repository.
 
-7. Create a pull request on GitHub, but before merging your changes complete the next task.
+7. Create a pull request on GitHub, but before merging your branch to `master` complete the next task.
 
 ## Task 6 - Create a Cloud Build trigger to deploy infrastructure changes from the master branch.
 

@@ -1,6 +1,6 @@
 terraform {
   backend "gcs" {
-    bucket = "daniel-palma-sandbox-tfstate"
+    bucket = "PROJECT_ID-tfstate"
     prefix = "env/prod"
   }
 }
