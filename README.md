@@ -2,14 +2,13 @@
 
 ## Overview
 
-In this lab, you will learn how to manage infrastructure as code with Terraform and Cloud Build using the popular GitOps methodology.
+In this lab, you will learn how to manage infrastructure as code with Terraform and Cloud Build using
+the popular GitOps methodology.
 
-The process starts when you push Terraform code to either a feature branch or the master branch. In the scenario when you push to the master branch, Cloud Build triggers and then applies Terraform manifests to achieve the state you want in the respective environment. On the other hand, when you push Terraform code to any other branch—for example, to a feature branch—Cloud Build runs to execute terraform plan, but nothing is applied to any environment.
-
-Ideally, either developers or operators must make infrastructure proposals to non-protected branches and then submit them through pull requests. The Cloud Build GitHub app, discussed later in this tutorial, automatically triggers the build jobs and links the terraform plan reports to these pull requests. This way, you can discuss and review the potential changes with collaborators and add follow-up commits before changes are merged into the base branch.
-
-If no concerns are raised, you must first merge the changes to the master branch. This merge triggers an infrastructure deployment to the prod environment triggering the infrastructure installation to the production environment.
-
+The process starts when you push Terraform code to the master branch.
+In this scenario,  Cloud Build triggers and then applies Terraform manifests to achieve the state you want in the
+respective environment. On the other hand, when you run Terraform code locally, you are able to change
+the infrastructure of the development environment.
 
 ## Objectives
 
@@ -17,7 +16,7 @@ If no concerns are raised, you must first merge the changes to the master branch
 - Set up your GitHub repository.
 - Configure Terraform to store state in a Cloud Storage bucket.
 - Grant permissions to your Cloud Build service account.
-- Connect Cloud Build to your GitHub repository.
+- Create the initial development environment infrastrcture.
 - Change your environment configuration in a feature branch.
 - Run terraform locally to change the development environment.
 - Promote changes to the production environment.
@@ -104,4 +103,44 @@ no changes added to commit (use "git add" and/or "git commit -a")
 git add --all
 git commit -m "Update project IDs and buckets"
 git push origin master
+```
+
+## Task 3 - Grant permissions to your Cloud Build service account.
+
+To allow Cloud Build service account to run Terraform scripts with the goal of managing Google Cloud resources,
+you need to grant it appropriate access to your project.
+For simplicity, project editor access is granted in this tutorial.
+But when the project editor role has a wide-range permission, in production environments
+you must follow your company's IT security best practices, usually providing least-privileged access.
+
+1. In Cloud Shell, retrieve the email for your project's Cloud Build service account:
+```shell
+CLOUDBUILD_SA="$(gcloud projects describe $PROJECT_ID \
+    --format 'value(projectNumber)')@cloudbuild.gserviceaccount.com"
+```
+2.Grant the required access to your Cloud Build service account:
+```shell
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+    --member serviceAccount:$CLOUDBUILD_SA --role roles/editor
+```
+
+## Task 4 - Create the initial development environment infrastrcture.
+
+Let's generate the initial state of the dev environment infrastructure on GCP. Run all of these commands from the
+`terraform` folder.
+
+1. Initialize the terraform configuration.
+```shell
+terraform init
+```
+
+2. See the proposed changes with plan. Make sure to specify the _dev_ enviroments `.tfvars` file, located at
+`environments/dev/terraform.tfvars`.
+```shell
+terraform plan -var-file=environments/dev/terraform.tfvars
+```
+
+3. If everything looks ok apply the changes!.
+```shell
+terraform apply -var-file=environments/dev/terraform.tfvars
 ```

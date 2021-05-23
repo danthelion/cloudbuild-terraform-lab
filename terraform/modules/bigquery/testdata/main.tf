@@ -7,9 +7,9 @@ resource "google_bigquery_dataset" "testdata_dataset" {
 
 }
 
-resource "google_bigquery_table" "testtable" {
+resource "google_bigquery_table" "testdata_table" {
   dataset_id = google_bigquery_dataset.testdata_dataset.dataset_id
   project = var.project
   table_id = var.table_id
-  schema = file("testtable.json")
+  schema = file("${path.module}/testtable.json")
 }

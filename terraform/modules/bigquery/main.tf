@@ -4,7 +4,7 @@ provider "google" {
 
 
 module "testdata" {
-  source = "testdata"
+  source = "./testdata"
 
   project = var.project
   env = var.env
