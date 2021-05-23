@@ -88,3 +88,20 @@ sed -i s/PROJECT_ID/$PROJECT_ID/g environments/*/backend.tf
 git status
 ```
 the output looks like this:
+```shell
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	modified:   environments/dev/backend.tf
+	modified:   environments/dev/terraform.tfvars
+	modified:   environments/prod/backend.tf
+	modified:   environments/prod/terraform.tfvars
+
+no changes added to commit (use "git add" and/or "git commit -a")
+```
+5. Commit and push your changes.
+```shell
+git add --all
+git commit -m "Update project IDs and buckets"
+git push origin master
+```
