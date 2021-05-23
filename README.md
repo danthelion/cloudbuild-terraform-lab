@@ -67,3 +67,24 @@ its own understanding of the current infrastructure.
 
 To help you avoid such issues, this section configures a remote state that points to a Cloud Storage bucket.
 Remote state is a feature of backends and, in this tutorial, is configured in the `backend.tf`.
+
+1. Create the Cloud Storage bucket
+```shell
+PROJECT_ID=$(gcloud config get-value project)
+gsutil mb gs://${PROJECT_ID}-tfstate
+```
+2. Enable Object Versioning to keep the history of your deployments
+```shell
+gsutil versioning set on gs://${PROJECT_ID}-tfstate
+```
+3. Replace the PROJECT_ID placeholder with the project ID in both the terraform.tfvars and backend.tf files.
+```shell
+cd terraform
+sed -i s/PROJECT_ID/$PROJECT_ID/g environments/*/terraform.tfvars
+sed -i s/PROJECT_ID/$PROJECT_ID/g environments/*/backend.tf
+```
+4. Check whether all files were updates
+```shell
+git status
+```
+the output looks like this:
