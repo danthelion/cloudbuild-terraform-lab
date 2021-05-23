@@ -19,6 +19,7 @@ the infrastructure of the development environment.
 - Create the initial development environment infrastrcture.
 - Change your environment configuration in a feature branch.
 - Run terraform locally to change the development environment.
+- Create a Cloud Build trigger to deploy infrastructure changes from the master branch.  
 - Promote changes to the production environment.
 
 ## Task 1 - Set up your GitHub repository.
@@ -124,14 +125,16 @@ gcloud projects add-iam-policy-binding $PROJECT_ID \
     --member serviceAccount:$CLOUDBUILD_SA --role roles/editor
 ```
 
-## Task 4 - Create the initial development environment infrastrcture.
+## Task 4 - Create the initial development environment infrastructure.
 
 Let's generate the initial state of the dev environment infrastructure on GCP. Run all of these commands from the
 `terraform` folder.
 
-1. Initialize the terraform configuration.
+1. Initialize the terraform configuration. Make sure to specify the _dev_ enviroments `.tfvars` file, located at
+`environments/dev/terraform.tfvars`. This file contains the values which tell terraform that we are using
+   the development environment.
 ```shell
-terraform init
+terraform init -var-file=environments/dev/terraform.tfvars
 ```
 
 2. See the proposed changes with plan. Make sure to specify the _dev_ enviroments `.tfvars` file, located at
@@ -144,3 +147,86 @@ terraform plan -var-file=environments/dev/terraform.tfvars
 ```shell
 terraform apply -var-file=environments/dev/terraform.tfvars
 ```
+
+4. Head over to your projects GCP console and verify that the resources have been created. You should see
+a new BigQuery dataset and a table under it.
+   
+## Task 5 - Change your environment configuration in a feature branch.
+
+If you would like to use an appropriate name for the new branch, the feature we will implement is a new
+table under the test dataset called `beer`.
+
+1. Create a feature branch from master in your local repostitory.
+```shell
+git checkout -b feature_branch_name
+```
+
+2. Create the schema for our new table in the directory `terraform/modules/bigquery/testdata/`.
+- The already existing tables name is `testtable.json` so let's call our new file `beer.json` to follow the
+   convention.
+- The new table should have 3 columns with the following types. Feel free to use the already existing 
+  `testttable.json` as an example.
+  - name - STRING
+  - brewery - FLOAT   
+  - abv - FLOAT64
+  
+3. Add the terraform definiton for the new table.
+- Create a new terraform resource in the file `terraform/modules/bigquery/testdata/main.tf`.
+- All the fields are the same as the sample table definiton except for two:
+  - table_id
+  - schema
+- The schema parameter should point to the `.json` file you created in the previous step.
+
+4. Create a new variable for the new table name.
+You have to add the new variable name in the following files:
+ - `terraform/variables.tf`
+ - `terraform/modules/bigquery/variables.tf`
+ - `terraform/environments/dev/variables.tf`
+ - `terraform/environments/prod/variables.tf`
+  
+In order to specify the actual value for the `dev` and `prod` environment, check out the following files:
+- `terraform/environments/dev/terraform.tfvars`
+- `terraform/environments/prod/terraform.tfvars`
+
+and add a variable in each with your chosen table name.
+
+5. Before commiting your changes, verify them locally with terraform, on the `dev` environment.
+```shell
+terraform plan -var-file=environments/dev/terraform.tfvars
+terraform apply -var-file=environments/dev/terraform.tfvars
+```
+
+6. Stage and commit your changes.
+
+7. Create a pull request on GitHub, but before merging your changes complete the next task.
+
+## Task 6 - Create a Cloud Build trigger to deploy infrastructure changes from the master branch.
+
+1. Head over to the Cloud Build > Triggers page on your GCP console and Click `Manage Repositories`.
+2. Click `Connect Repository`.
+- Select GitHub as source.
+- Select your GitHub account and this repository.
+3. Select `Create a Trigger`.
+- Give a name to your trigger, something like `Release to production` will work.
+- Under `Event`, select `Push to a branch`.
+- The source should be `your_github_user/cloudbuild-terraform-lab (GitHub App)`.
+- For `Branch`, type in `master`, as we want this trigger to activate on code changes on the `master` branch only.
+- Under `Configuration` select `Cloud Build configuration file (yaml or json)` for type and `Repository` for location.
+  - The Cloud Build configuration file location is just `cloudbuild.yaml`, as the file is located in the repo root.
+- Select `Create`. 
+
+## Task 7 - Promote changes to the production environment.
+1. Take a look at the file `cloudbuild.yaml` to study its contents before proceeding. This file
+contains the build steps Cloud Build will go through when the trigger is activated which we created in
+the previous step.
+   
+2. As you can see the build steps resemble the manual steps we did when promoting changes to the
+dev environment, except for the `apply` step we skip the manual agreement via the `-auto-approve` flag,
+   and we use the `.tfvars` file located at `terraform/environments/prod/terraform.tfvars` instead of
+the dev environment one.
+   
+3. Merge your PR on GitHub, which will activate the Cloud Build trigger.
+
+4. You can see the results on the GitHub PR page as well as on the Triggers page of the Cloud Build UI.
+
+5. If the build is successful, make sure to verify it by checking out the new table on your BigQuery interface.

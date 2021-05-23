@@ -1,4 +1,5 @@
-project = "PROJECT_ID"
+project = "daniel-palma-sandbox"
 env = "prod"
-dataset_id="test_dataset"
-table_id="test_table"
+dataset_id = "test_dataset"
+table_id = "test_table"
+deletion_protection = "false"

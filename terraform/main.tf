@@ -8,4 +8,5 @@ module "bigquery" {
   dataset_id = var.dataset_id
   table_id = var.table_id
   env = var.env
+  deletion_protection = var.deletion_protection
 }
