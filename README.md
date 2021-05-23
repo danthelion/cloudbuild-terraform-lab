@@ -83,7 +83,7 @@ cd terraform
 sed -i s/PROJECT_ID/$PROJECT_ID/g environments/*/terraform.tfvars
 sed -i s/PROJECT_ID/$PROJECT_ID/g environments/*/backend.tf
 ```
-4. Check whether all files were updates
+4. Check whether all files were updated
 ```shell
 git status
 ```
