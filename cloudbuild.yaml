@@ -1,31 +1,22 @@
 steps:
-- id: 'tf init'
-  name: 'hashicorp/terraform:0.15.4'
-  entrypoint: 'sh'
-  dir: terraform
-  args: 
-  - '-c'
-  - |
-      terraform init -var-file=environments/prod/terraform.tfvars
+  # [START tf-init]
+  - id: 'tf init'
+    name: 'hashicorp/terraform:0.15.4'
+    entrypoint: 'sh'
+    dir: terraform
+    args:
+      - '-c'
+      - |
+        terraform init -var-file=environments/prod/terraform.tfvars
+  # [END tf-init]
 
-# [START tf-plan]
-- id: 'tf plan'
-  name: 'hashicorp/terraform:0.15.4'
-  entrypoint: 'sh'
-  dir: terraform
-  args: 
-  - '-c'
-  - | 
-      terraform plan -var-file=environments/prod/terraform.tfvars
-# [END tf-plan]
-
-# [START tf-apply]
-- id: 'tf apply'
-  name: 'hashicorp/terraform:0.15.4'
-  entrypoint: 'sh'
-  dir: terraform
-  args: 
-  - '-c'
-  - | 
-      terraform apply -auto-approve -var-file=environments/prod/terraform.tfvars
-# [END tf-apply]      
+  # [START tf-plan]
+  - id: 'tf plan'
+    name: 'hashicorp/terraform:0.15.4'
+    entrypoint: 'sh'
+    dir: terraform
+    args:
+      - '-c'
+      - |
+        terraform plan -var-file=environments/prod/terraform.tfvars
+  # [END tf-plan]
