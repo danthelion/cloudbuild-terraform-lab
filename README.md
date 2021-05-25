@@ -12,6 +12,7 @@ the infrastructure of the development environment.
 
 ## Objectives
 
+Part 1
 
 - Set up your GitHub repository.
 - Configure Terraform to store state in a Cloud Storage bucket.
@@ -21,6 +22,11 @@ the infrastructure of the development environment.
 - Run terraform locally to change the development environment.
 - Create a Cloud Build trigger to deploy infrastructure changes from the master branch.  
 - Promote changes to the production environment.
+
+Part 2
+
+- Create an Event-Driven Cloud Function which loads data into BigQuery.
+- Create a Cloud Pub/Sub trigger for the function.
 
 ## Requirements
 
@@ -170,7 +176,7 @@ git checkout -b feature_branch_name
 - The already existing tables name is `testtable.json` so let's call our new file `beer.json` to follow the
    convention.
 - The new table should have 3 columns with the following types. Feel free to use the already existing 
-  `testttable.json` as an example.
+  `testtable.json` as an example.
   - name - STRING
   - brewery - FLOAT   
   - abv - FLOAT64
@@ -183,9 +189,10 @@ git checkout -b feature_branch_name
 - The schema parameter should point to the `.json` file you created in the previous step.
 
 4. Create a new variable for the new table name.
-You have to add the new variable name in the following files:
+You have to define the new variable name in the following files: (`variable "beer_table_id" {}`)
  - `terraform/variables.tf`
  - `terraform/modules/bigquery/variables.tf`
+ - `terraform/modules/bigquery/testdata/variables.tf`
  - `terraform/environments/dev/variables.tf`
  - `terraform/environments/prod/variables.tf`
   
@@ -193,7 +200,11 @@ In order to specify the actual value for the `dev` and `prod` environment, check
 - `terraform/environments/dev/terraform.tfvars`
 - `terraform/environments/prod/terraform.tfvars`
 
-and add a variable in each with your chosen table name.
+and add a variable in each with your chosen table name, for example: `beer_table_id="beer"`
+
+Lastly you will need to propagate the value in the following files for the BigQuery module definitons as well:
+- `terraform/main.tf`
+- `terraform/modules/bigquery/testdata/main.tf`
 
 5. Before commiting your changes, verify them locally with terraform, on the `dev` environment.
 ```shell
@@ -235,3 +246,27 @@ the dev environment one.
 4. You can see the results on the GitHub PR page as well as on the Triggers page of the Cloud Build UI.
 
 5. If the build is successful, make sure to verify it by checking out the new table on your BigQuery interface.
+
+## Task 7 - Create an Event-Driven Cloud Function which loads data into BigQuery.
+1. Uncomment the `pubsub` and `cloudfunctions` modules in `terraform/main.tf`.
+2. Re-initialize terraform.
+```shell
+terraform init -var-file=environments/dev/terraform.tfvars
+```
+3. The code of the Cloud Function is located in the folder `terraform/modules/cloudfunctions/loader`.
+`main.py` contains the Python function which will read the data from the Pub/Sub message and load it into
+   BigQuery while `requirements.txt` defines the extra modules the function needs.
+Edit the file `terraform/modules/cloudfunctions/loader/main.py` so when the function runs it loads
+data into the correct bigquery table. Remember that because in this tutorial we only separate the `prod`
+   and `dev` environments via the dataset name, your dataset will have a `_dev` postfix. Make sure to check
+   the correct name before applying the infrastructure changes.
+4. Apply the changes to the dev environment. 
+```shell
+terraform apply -var-file=environments/dev/terraform.tfvars
+```
+5. Test out the data pipeline by sending a message to the pubsub topic!
+An example payload would look something like this:
+```json
+{"name": "Tripel Karmeliet", "brewery": "Bosteels Brewery", "abv": 8.4}
+```
+6. Check logs, BQ table
