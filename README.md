@@ -3,9 +3,9 @@
 ## Overview
 
 In this lab, you will learn how to manage infrastructure as code with Terraform and Cloud Build using the popular GitOps
-methodology.
+methodology and you will also set up a data ingestion pipeline with Pub/Sub and Cloud Functions.
 
-The process starts when you push Terraform code to the master branch. In this scenario, Cloud Build triggers and then
+The automated process starts when you push Terraform code to the master branch. In this scenario, Cloud Build triggers and then
 applies Terraform manifests to achieve the state you want in the respective environment. On the other hand, when you run
 Terraform code locally, you are able to change the infrastructure of the development environment.
 
@@ -20,7 +20,7 @@ Part 1
 - Change your environment configuration in a feature branch.
 - Run terraform locally to change the development environment.
 - Create a Cloud Build trigger to deploy infrastructure changes from the master branch.
-- Add the missing terraform apply step to the cloudbuild file
+- Add the missing terraform apply step to the cloudbuild file.
 - Promote changes to the production environment.
 
 Part 2
@@ -53,13 +53,13 @@ The code in the *terraform* folder of this repository is structured as follows:
 
 For the master branch, the following steps are executed:
 
-- terraform init
-- terraform plan
-- terraform apply
+- `terraform init`
+- `terraform plan`
+- `terraform apply`
 
-For any other branch, the following steps are executed:
+For any other branch, the following steps would be executed (This is not implemented in this tutorial):
 
-terraform init for all environments subfolders terraform plan for all environments subfolders The reason terraform init
+`terraform init` for all environments subfolders, `terraform plan` for all environments subfolders The reason terraform init
 and terraform plan run for all environments subfolders is to make sure that the changes being proposed hold for every
 single environment. This way, before merging the pull request, you can review the plans to make sure access is not being
 granted to an unauthorized entity, for example.
@@ -86,7 +86,7 @@ gsutil mb gs://${PROJECT_ID}-tfstate
 gsutil versioning set on gs://${PROJECT_ID}-tfstate
 ```
 
-3. Replace the PROJECT_ID placeholder with the project ID in both the terraform.tfvars and backend.tf files.
+3. Replace the PROJECT_ID placeholder with the project ID in both the `terraform.tfvars` and `backend.tf` files.
 
 ```shell
 cd terraform
@@ -150,7 +150,8 @@ Let's generate the initial state of the dev environment infrastructure on GCP. R
 
 1. Initialize the terraform configuration. Make sure to specify the _dev_ enviroments `.tfvars` file, located at
    `environments/dev/terraform.tfvars`. This file contains the values which tell terraform that we are using the
-   development environment.
+   development environment. For more information about how Variable Definitions work, check out the official
+   documentation here https://www.terraform.io/docs/language/values/variables.html#variable-definitions-tfvars-files.
 
 ```shell
 terraform init -var-file=environments/dev/terraform.tfvars
@@ -170,7 +171,7 @@ terraform apply -var-file=environments/dev/terraform.tfvars
 ```
 
 4. Head over to your projects GCP console and verify that the resources have been created. You should see a new BigQuery
-   dataset and a table under it.
+   dataset, and a table under it.
 
 ## Task 5 - Change your environment configuration in a feature branch.
 
@@ -180,16 +181,16 @@ test dataset called `beer`.
 1. Create a feature branch from master in your local repostitory.
 
 ```shell
-git checkout -b feature_branch_name
+git checkout -b add_beer_table
 ```
 
 2. Create the schema for our new table in the directory `terraform/modules/bigquery/testdata/`.
 
-- The already existing tables name is `testtable.json` so let's call our new file `beer.json` to follow the convention.
+- The already existing tables schema definition is in `testtable.json` so let's call our new file `beer.json` to follow the convention.
 - The new table should have 3 columns with the following types. Feel free to use the already existing
   `testtable.json` as an example.
     - name - STRING
-    - brewery - FLOAT
+    - brewery - STRING
     - abv - FLOAT64
 
 3. Add the terraform definiton for the new table.
@@ -228,6 +229,8 @@ terraform plan -var-file=environments/dev/terraform.tfvars
 terraform apply -var-file=environments/dev/terraform.tfvars
 ```
 
+Check out the BigQuery console to see the results, there should be a new, empty table under your _dev dataset.
+
 6. Stage, commit and push your changes to the remote repository.
 
 7. Create a pull request on GitHub, but before merging your branch to `master` complete the next tasks.
@@ -253,7 +256,7 @@ terraform apply -var-file=environments/dev/terraform.tfvars
 ## Task 7 - Add the missing terraform apply step to the cloudbuild file.
 
 Almost everything is in place for our automated infrastructure deploymend pipeline, but the last step,
-`terraform apply` is missing from the build definiton file!
+`terraform apply` is missing from the build definiton file! Let's fix this quickly.
 
 1. Take a look at `cloudbuild.yaml`.
 2. Add a third step in the build process to call `terraform apply`. The previous two steps can be used as examples. Make
@@ -279,20 +282,32 @@ Almost everything is in place for our automated infrastructure deploymend pipeli
 ## Task 9 - Create an Event-Driven Cloud Function which loads data into BigQuery.
 
 1. Uncomment the `pubsub` and `cloudfunctions` modules in `terraform/main.tf`.
-2. Re-initialize terraform (use the `dev` environment).
+2. Re-initialize terraform (use the `dev` environment) to load the new modules.
 
 ```shell
 terraform init -var-file=environments/dev/terraform.tfvars
 ```
 
 3. The code of the Cloud Function is located in the folder `terraform/modules/cloudfunctions/loader`.
-   `main.py` contains the Python function which will read the data from the Pub/Sub message and load it into BigQuery
-   while `requirements.txt` defines the extra modules the function needs. Edit the
-   file `terraform/modules/cloudfunctions/loader/main.py` so when the function runs it loads data into the correct
-   bigquery table. Remember that because in this tutorial we only separate the `prod`
-   and `dev` environments via the dataset name, your dataset will have a `_dev` postfix. Make sure to check the correct
-   name before applying the infrastructure changes.
-4. Apply the changes to the dev environment.
+
+`main.py` contains the Python function which will read the data from the Pub/Sub message and load it into BigQuery
+while `requirements.txt` defines the extra modules the function needs. Edit the
+file `terraform/modules/cloudfunctions/loader/main.py` so when the function runs it loads data into the correct
+bigquery table. Look for the text `TODO (developer)` if you are feeling lost.
+Remember that because in this tutorial we only separate the `prod`
+and `dev` environments via the dataset name, your dataset will have a `_dev` postfix. Make sure to check the correct
+name before applying the infrastructure changes.
+   
+
+4. Take a minute and look at the execution plan of terraform.
+```shell
+terraform plan -var-file=environments/dev/terraform.tfvars
+```
+
+We are adding a few new resources, so it might be confusing at first, but it's great practice to always
+check out the plan before applying the changes.
+
+5. Apply the changes to the dev environment.
 
 ```shell
 terraform apply -var-file=environments/dev/terraform.tfvars
@@ -314,7 +329,7 @@ event_trigger {
   }
 ```
 
-5. Test out the data pipeline by sending a message to the Pub/Sub topic! Head over to the Pub/Sub page on your console,
+6. Test out the data pipeline by sending a message to the Pub/Sub topic! Head over to the Pub/Sub page on your console,
    select the target topic and press `Publish Message`. An example message payload would look something like this:
 
 ```json
@@ -326,13 +341,14 @@ event_trigger {
 ```
 
 Also try out the example loader script located in the `loader-test` folder to see how an application would
-send messages to a Pub/Sub topic! Simply install the required package from the `requirements.txt` file,
+send messages to a Pub/Sub topic! Simply install the required package from the `requirements.txt` file
+with `pip install -r requirements.txt`, then
 edit the `project-id` and `topic-id` values in the script and run it with `python loader-test.py`.
 
 The example json contains 3 entries, which will be sent to the Pub/Sub topic.
 
-6. To check the output of the Cloud Function, select the function on your console and press `Logs`. If everything went
+7. To check the output of the Cloud Function, select the function on your console and press `Logs`. If everything went
    well, you should see `"New rows have been added."` as the final output.
 
-7. Finally, check the `beer` table to see that the data has been inserted correctly! Try the loader out with
+8. Finally, check the `beer` table to see that the data has been inserted correctly! Try the loader out with
 invalid input (a missing field for example) and check how GCP tells you the function failed and see the logs for details.

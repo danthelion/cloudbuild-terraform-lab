@@ -26,6 +26,7 @@ def hello_pubsub(event, context):
         None. The output is written to Cloud Logging.
     """
 
+    # TODO (developer) Edit these values according to your setup.
     project_id = 'PLACEHOLDER_PROJECT_ID'
     dataset_id = 'PLACEHOLDER_DATASET_ID'
     table_id = 'PLACEHOLDER_TABLE_ID'
