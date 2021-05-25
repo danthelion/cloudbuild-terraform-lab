@@ -264,9 +264,17 @@ data into the correct bigquery table. Remember that because in this tutorial we 
 ```shell
 terraform apply -var-file=environments/dev/terraform.tfvars
 ```
-5. Test out the data pipeline by sending a message to the pubsub topic!
-An example payload would look something like this:
+5. Test out the data pipeline by sending a message to the Pub/Sub topic! Head over to the Pub/Sub page
+on your console, select the target topic and press `Publish Message`.
+An example message payload would look something like this:
 ```json
-{"name": "Tripel Karmeliet", "brewery": "Bosteels Brewery", "abv": 8.4}
+{
+  "name": "Tripel Karmeliet",
+  "brewery": "Bosteels Brewery",
+  "abv": 8.4
+}
 ```
-6. Check logs, BQ table
+6. To check the output of the Cloud Function, select the function on your console and press `Logs`. 
+If everything went well, you should see `"New rows have been added."` as the final output.
+   
+7. Finally, check the `beer` table to see that the data has been inserted correctly! 
