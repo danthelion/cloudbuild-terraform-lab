@@ -1,0 +1,17 @@
+[
+  {
+    "name": "Tripel Karmeliet",
+    "brewery": "Bosteels Brewery",
+    "abv": 8.4
+  },
+  {
+    "name": "Rodenbach Grand Cru",
+    "brewery": "Brouwerij Rodenbach / Palm",
+    "abv": 6.0
+  },
+  {
+    "name": "Lou Pepe Gueuze",
+    "brewery": "Brasserie Cantillon",
+    "abv": 5.0
+  }
+]

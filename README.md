@@ -325,6 +325,12 @@ event_trigger {
 }
 ```
 
+Also try out the example loader script located in the `loader-test` folder to see how an application would
+send messages to a Pub/Sub topic! Simply install the required package from the `requirements.txt` file,
+edit the `project-id` and `topic-id` values in the script and run it with `python loader-test.py`.
+
+The example json contains 3 entries, which will be sent to the Pub/Sub topic.
+
 6. To check the output of the Cloud Function, select the function on your console and press `Logs`. If everything went
    well, you should see `"New rows have been added."` as the final output.
 
