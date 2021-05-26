@@ -1,0 +1,20 @@
+[
+  {
+    "description": "name",
+    "mode": "NULLABLE",
+    "name": "name",
+    "type": "STRING"
+  },
+  {
+    "description": "brewery",
+    "mode": "NULLABLE",
+    "name": "brewery",
+    "type": "STRING"
+  },
+  {
+    "description": "abv",
+    "mode": "NULLABLE",
+    "name": "abv",
+    "type": "FLOAT64"
+  }
+]

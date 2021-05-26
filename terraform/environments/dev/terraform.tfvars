@@ -1,5 +1,6 @@
-project = "PROJECT_ID"
+project = "dptraining1"
 env = "dev"
 dataset_id = "test_dataset"
 table_id = "test_table"
 deletion_protection = "false"
+beer_table_id = "beer"
