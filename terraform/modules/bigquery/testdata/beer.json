@@ -1,0 +1,20 @@
+[
+  {
+    "description": "The name of the beer.",
+    "mode": "NULLABLE",
+    "name": "name",
+    "type": "STRING"
+  },
+  {
+    "description": "Brewery of the beer.",
+    "mode": "NULLABLE",
+    "name": "brewery",
+    "type": "STRING"
+  },
+  {
+    "description": "Alcohol by volume",
+    "mode": "NULLABLE",
+    "name": "abv",
+    "type": "FLOAT64"
+  }
+]
