@@ -20,3 +20,14 @@ steps:
       - |
         terraform plan -var-file=environments/prod/terraform.tfvars
   # [END tf-plan]
+
+  # [START tf-apply]
+  - id: 'tf apply'
+    name: 'hashicorp/terraform:0.15.4'
+    entrypoint: 'sh'
+    dir: terraform
+    args:
+      - '-c'
+      - |
+        terraform apply -var-file=environments/prod/terraform.tfvars -auto-aprove
+  # [END tf-apply]
