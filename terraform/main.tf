@@ -9,6 +9,7 @@ module "bigquery" {
   table_id = var.table_id
   env = var.env
   deletion_protection = var.deletion_protection
+  beer_table_id = var.beer_table_id
 }
 
 //module "pubsub" {
