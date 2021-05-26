@@ -1,4 +1,4 @@
-project = "PROJECT_ID"
+project = "dptraining5"
 env = "prod"
 dataset_id = "test_dataset"
 table_id = "test_table"
