@@ -29,5 +29,5 @@ steps:
     args:
       - '-c'
       - |
-        terraform apply -var-file=environments/prod/terraform.tfvars -auto-aprove
+        terraform apply -var-file=environments/prod/terraform.tfvars -auto-approve
   # [END tf-apply]
